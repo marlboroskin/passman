@@ -81,19 +81,7 @@ Overwrites current vault. Requires the same master password
 Backups are encrypted — safe to store on USB, cloud, or email.
 
 🧱 Project Structure
-passman/
-├── main.go               # CLI menu & flow
-├── account/
-│   ├── account.go        # Account model
-│   ├── vault.go          # In-memory storage & search
-│   └── crypto/
-│       └── encrypt.go    # AES + PBKDF2 encryption
-├── files/
-│   └── files.go          # Safe file I/O
-├── data.enc              # Your encrypted vault (never share!)
-├── backup/               # Encrypted backup files
-├── go.mod
-└── README.md
+passman/ ├── main.go # CLI menu & flow ├── account/ │ ├── account.go # Account model │ ├── vault.go # In-memory storage & search │ └── crypto/ │ └── encrypt.go # AES + PBKDF2 encryption ├── files/ │ └── files.go # Safe file I/O ├── data.enc # Your encrypted vault (never share!) ├── backup/ # Encrypted backup files ├── go.mod └── README.md
 
 📦 Dependencies
 github.com/fatih/color — Colored terminal output
