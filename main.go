@@ -162,8 +162,6 @@ func loadVaultWithRetries(attempts int) *account.Vault {
 }
 
 func saveVault(vault *account.Vault) {
-    fmt.Println("❌ DEBUG: saveVault начат")
-	os.Stdout.Sync()
 
 	data, err := json.MarshalIndent(vault, "", "  ")
 	if err != nil {
@@ -187,8 +185,6 @@ func saveVault(vault *account.Vault) {
 	}
 
 	files.WriteFile(encrypted, "data.enc")
-	fmt.Println("✅ Файл data.enc должен быть создан")
-	os.Stdout.Sync()
 }
 
 func promptData(prompt string) string {

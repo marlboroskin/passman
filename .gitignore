@@ -1,4 +1,24 @@
-gitignore
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Generated files
 data.enc
-backup/
-.exe
+data.json
+temp_icon.png
+
+# Backups
+/backup/
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+__pycache__/
+
+# Windows
+$RECYCLE.BIN/
+System Volume Information/
