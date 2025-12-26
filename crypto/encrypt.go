@@ -12,9 +12,13 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 )
 
+const debug = false
+
 // Encrypt шифрует данные с помощью пароля
 func Encrypt(data, password []byte) ([]byte, error) {
-	fmt.Println("🔐 DEBUG: Начало шифрования")
+	if debug {
+		fmt.Println("🔐 DEBUG: Начало шифрования")
+	}
 	os.Stdout.Sync()
 
 	salt := make([]byte, 32)
