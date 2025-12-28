@@ -103,18 +103,22 @@ __Менеджер паролей__
 
 ```text
 passman/
-├── main.go              # Основной код, меню, логика
+├── cmd/app.go              # Точка входа
+├── internal/
+│   ├── app/app.go          # Логика CLI
+│   ├── auth/auth.go        # Проверка пароля
+│   └── config/storage.go   # Выбор хранилища
 ├── account/
-│   ├── account.go       # Модель аккаунта
-│   └── vault.go         # Хранилище и поиск
+│   ├── account.go          # Модель аккаунта
+│   └── vault.go            # Сейф и поиск
 ├── crypto/
-│   └── encrypt.go       # Шифрование AES + PBKDF2
+│   └── encrypt.go          # Шифрование AES + PBKDF2
 ├── files/
-│   └── files.go         # Работа с файлами
+│   └── files.go            # Локальное хранилище
 ├── cloud/
-│   └── cloud.go         # Поддержка WebDAV
-├── data.enc             # Зашифрованный сейф (не передавайте!)
-├── backup/              # Резервные копии
+│   └── cloud.go            # WebDAV
+├── data.enc                # Зашифрованный сейф (не передавайте!)
+├── backup/                 # Резервные копии
 ├── go.mod
 └── README.md
 ```
