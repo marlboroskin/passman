@@ -1,106 +1,129 @@
-# PassMan — Secure Password Manager
+# PassMan — Защищённый менеджер паролей
 
-Your secrets, protected. No cloud. No tracking. Just Go.
+Без облака. Без слежки. Только Go.
 
-A minimal, secure, and self-hosted password manager built with Go.  
-Encrypt your credentials locally with AES-256-GCM and PBKDF2.  
-No external servers. No dependencies. Just a single binary.
-
----
-
-## Features
-
-- **End-to-End Encryption**  
-  Your data is encrypted with AES-256-GCM using your master password. Only you can decrypt it.
-
-- **Strong Key Derivation**  
-  PBKDF2-HMAC-SHA256 with 100,000 iterations — resistant to brute-force attacks.
-
-- **Smart Search**  
-  Find accounts by name, login, or URL — case-insensitive and fast.
-
-- **Copy to Clipboard**  
-  Instantly copy any password with one command. Auto-clears after 10 seconds (coming soon).
-
-- **Local-Only Storage**  
-  Everything is saved to `data.enc` — no cloud, no servers, no logs.
-
-- **Backup & Restore**  
-  Create encrypted backups. Restore from any backup file with your password.
-
-- **Password Generation**  
-  Generate strong passwords (8–128 characters) with letters, digits, and symbols.
-
-- **Clean CLI Interface**  
-  Simple menu-driven interface — no learning curve.
+Минималистичный, безопасный и автономный менеджер паролей на языке Go.  
+Все данные шифруются локально с помощью AES-256-GCM и PBKDF2.  
+Никаких внешних серверов. Никаких зависимостей. Только один исполняемый файл.
 
 ---
 
-## Quick Start
+## 🔐 Особенности
 
-1. **Download or build the binary**
-   ```bash
-   go build -o passman.exe main.go
+- **Полное шифрование (End-to-End)**  
+  Все данные шифруются с помощью вашего мастер-пароля. Расшифровать может только вы.
 
-Run it
+- **Надёжный ключ**  
+  Используется PBKDF2-HMAC-SHA256 с 100 000 итераций — защита от подбора.
 
-./passman.exe   
+- **Умный поиск**  
+  Найдите аккаунт по имени, логину или URL — без учёта регистра.
 
-Enter a strong master password
-(e.g. MyPass123!) — you’ll need it every time.
+- **Копирование в буфер обмена**  
+  Скопируйте пароль одной командой. Автоочистка через 10 секунд.
 
-Use the menu:
+- **Запоминание пароля**  
+  После ввода мастер-пароля он запоминается на 10 минут (безопасно, в памяти).
 
-__Password Manager__
-1. Create account
-2. Find account
-3. Delete account
-4. Exit
-5. Generate password
-6. Copy password to clipboard
-7. Create encrypted backup
-8. Restore from backup
+- **Локальное или облачное хранение**  
+  Храните `data.enc` локально или в облаке через WebDAV (Nextcloud, rclone + Яндекс.Диск).
+
+- **Резервное копирование**  
+  Создавайте зашифрованные резервные копии. Восстанавливайте при необходимости.
+
+- **Генерация паролей**  
+  Создавайте надёжные пароли длиной от 8 до 128 символов.
+
+- **Удобное меню**  
+  Простой CLI-интерфейс — без лишних сложностей.
+
+---
+
+## 🚀 Быстрый старт
+
+1. **Соберите программу**
+```text
+   go build -o PassMan.exe .
+```
+
+2. Запустите
+```text
+.\PassMan.exe
+```
+
+3. Введите мастер-пароль
+Например: МойПароль123! — он понадобится каждый раз при открытии.
+
+4. Используйте меню:
+
+__Менеджер паролей__
+1. Создать аккаунт
+2. Найти аккаунт
+3. Удалить аккаунт
+4. Выход
+5. Сгенерировать пароль
+6. Скопировать пароль в буфер обмена
+7. Создать резервную копию сейфа
+8. Восстановить сейф из резервной копии
+
+🔒 Безопасность
+Шифрование: AES-256-GCM с солью и случайным nonce
+Ключ: PBKDF2-HMAC-SHA256, 100 000 итераций
+Хранение: Все данные зашифрованы в data.enc
+Нет интернета: Никаких запросов, аналитики или слежки
+Буфер обмена: Очищается автоматически через 10 секунд
+
+⚠️ Внимание: Если вы потеряете мастер-пароль — восстановить данные невозможно. Сохраните его в надёжном месте.
+
+💾 Резервное копирование
+Создать резервную копию (пункт 7):
+Сохраняет зашифрованный файл в папку backup/vault_2025-04-05_12-30-45.enc
+
+Восстановить из резервной копии (пункт 8):
+Перезаписывает текущий сейф. Требуется тот же мастер-пароль.
+
+Резервные копии зашифрованы — их можно безопасно хранить на флешке, в облаке или email.
+
+```text
+passman/
+├── main.go              # Основной код, меню, логика
+├── account/
+│   ├── account.go       # Модель аккаунта
+│   └── vault.go         # Хранилище и поиск
+├── crypto/
+│   └── encrypt.go       # Шифрование AES + PBKDF2
+├── files/
+│   └── files.go         # Работа с файлами
+├── cloud/
+│   └── cloud.go         # Поддержка WebDAV
+├── data.enc             # Зашифрованный сейф (не передавайте!)
+├── backup/              # Резервные копии
+├── go.mod
+└── README.md
+```
 
 
-🔐 Security
+📦 Зависимости
+github.com/fatih/color — цветной вывод в терминал
+github.com/atotto/clipboard — работа с буфером обмена
 
-Encryption: AES-256-GCM with random salt and nonce
-Key Derivation: PBKDF2-HMAC-SHA256, 100,000 iterations
-Storage: All data encrypted in data.enc
-No Internet: Zero network calls, no analytics, no tracking
+Установите:
 
-⚠️ Warning: If you lose your master password — recovery is impossible. Keep it safe.
-
-💾 Backup & Recovery
-Create Backup (Menu 7):
-Saves an encrypted backup to backup/vault_2025-04-05_12-30-45.enc
-
-Restore from Backup (Menu 8):
-Overwrites current vault. Requires the same master password
-
-Backups are encrypted — safe to store on USB, cloud, or email.
-
-🧱 Project Structure
-passman/ ├── main.go # CLI menu & flow ├── account/ │ ├── account.go # Account model │ ├── vault.go # In-memory storage & search │ └── crypto/ │ └── encrypt.go # AES + PBKDF2 encryption ├── files/ │ └── files.go # Safe file I/O ├── data.enc # Your encrypted vault (never share!) ├── backup/ # Encrypted backup files ├── go.mod └── README.md
-
-📦 Dependencies
-github.com/fatih/color — Colored terminal output
-github.com/atotto/clipboard — Copy to clipboard
-
-Install with:
+```text
 go get github.com/fatih/color
+```
+```text
 go get github.com/atotto/clipboard
+```
 
-🛡️ Best Practices
-Use a strong master password (12+ chars, mix of upper, lower, digits, symbols)
-Store data.enc in a safe place (encrypted drive, USB, etc.)
-Back up regularly
-Never share your master password
+🛡️ Рекомендации
 
-🙌 Made with Go
-This project proves that security, simplicity, and usability can coexist —
-in under 500 lines of clean Go code.
+Используйте сильный мастер-пароль (12+ символов, заглавные, цифры, спецсимволы)
+Храните data.enc в безопасном месте (шифрованный диск, флешка)
+Регулярно делайте резервные копии
+Никогда не передавайте мастер-пароль
 
-No frameworks. No bloat. Just trust.
+🙌 Создано на Go
 
-🚀 Use it. Secure it. Own it.# passman
+Этот проект доказывает, что безопасность, простота и удобство могут сосуществовать —
+всё в менее чем 600 строках чистого Go-кода.

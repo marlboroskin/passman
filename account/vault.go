@@ -2,6 +2,7 @@ package account
 
 import (
 	"encoding/json"
+	"menedger_paroley/crypto"
 	"menedger_paroley/output"
 	"strings"
 	"sync"
@@ -17,19 +18,19 @@ type Vault struct {
 	Accounts     []Account `json:"accounts"`
 	UpdatedAt    time.Time `json:"updatedAt"`
 	Verification string    `json:"verification"`
-	Mu           sync.RWMutex
 }
 
 type VaultWithDb struct {
-	Vault
-	Db Db
+	Data Vault
+	Db   Db
+	sync.RWMutex
 }
 
 func NewVault(db Db) *VaultWithDb {
 	file, err := db.Read()
 	if err != nil {
 		return &VaultWithDb{
-			Vault: Vault{
+			Data: Vault{
 				Accounts:  []Account{},
 				UpdatedAt: time.Now(),
 			},
@@ -42,7 +43,7 @@ func NewVault(db Db) *VaultWithDb {
 	if err != nil {
 		output.PrintError("Ошибка чтения хранилища: неверный формат данных")
 		return &VaultWithDb{
-			Vault: Vault{
+			Data: Vault{
 				Accounts:  []Account{},
 				UpdatedAt: time.Now(),
 			},
@@ -51,49 +52,53 @@ func NewVault(db Db) *VaultWithDb {
 	}
 
 	return &VaultWithDb{
-		Vault: vault,
-		Db:    db,
+		Data: vault,
+		Db:   db,
 	}
 }
 
-func (vault *Vault) DeleteAccountByURL(url string) bool {
+func (v *VaultWithDb) DeleteAccountByURL(url string) bool {
+	v.Lock()
+	defer v.Unlock()
 	var accounts []Account
 	isDeleted := false
-	for _, account := range vault.Accounts {
-		isMatched := strings.Contains(strings.ToLower(account.URL), strings.ToLower(url))
+	for _, acc := range v.Data.Accounts {
+		isMatched := strings.Contains(strings.ToLower(acc.URL), strings.ToLower(url))
 		if !isMatched {
-			accounts = append(accounts, account)
+			accounts = append(accounts, acc)
 			continue
 		}
 		isDeleted = true
 	}
-	vault.Accounts = accounts
-	vault.UpdatedAt = time.Now()
+	v.Data.Accounts = accounts
+	v.Data.UpdatedAt = time.Now()
 	return isDeleted
 }
 
-func (vault *Vault) AddAccount(acc Account) {
-	vault.Mu.Lock()
-	defer vault.Mu.Unlock()
-	vault.Accounts = append(vault.Accounts, acc)
-	vault.UpdatedAt = time.Now()
+func (v *VaultWithDb) AddAccount(acc Account) {
+	v.Lock()
+	defer v.Unlock()
+	v.Data.Accounts = append(v.Data.Accounts, acc)
+	v.Data.UpdatedAt = time.Now()
 }
 
-func (vault *Vault) ToBytes() ([]byte, error) {
-	data, err := json.MarshalIndent(vault, "", "  ")
+func (vault *VaultWithDb) ToBytes() ([]byte, error) {
+	vault.RLock()
+	defer vault.RUnlock()
+	data, err := json.MarshalIndent(&vault.Data, "", "  ")
 	if err != nil {
 		return nil, err
 	}
 	return data, nil
 }
 
-func (vault *Vault) FindAccount(query string) []Account {
-	vault.Mu.RLock()
-	defer vault.Mu.RUnlock()
+func (v *VaultWithDb) FindAccount(query string) []Account {
+	v.RLock()
+	defer v.RUnlock()
 	var accounts []Account
 	q := strings.ToLower(query)
 
-	for _, acc := range vault.Accounts {
+	for _, acc := range v.Data.Accounts {
 		if strings.Contains(strings.ToLower(acc.Name), q) ||
 			strings.Contains(strings.ToLower(acc.Login), q) ||
 			strings.Contains(strings.ToLower(acc.URL), q) {
@@ -104,31 +109,21 @@ func (vault *Vault) FindAccount(query string) []Account {
 }
 
 func (vault *VaultWithDb) Save() error {
-	data, err := vault.ToBytes()
+	vault.RLock()
+	data, err := json.MarshalIndent(&vault.Data, "", "  ")
+	vault.RUnlock()
 	if err != nil {
 		output.PrintError(err)
 		return err
 	}
-	err = vault.Db.Write(data)
+
+	// 🔐 Шифруем данные
+	password := "master" // ← НЕЛЬЗЯ ЖЁСТКО! Нужно получать из вне
+	encrypted, err := crypto.Encrypt(data, []byte(password))
 	if err != nil {
-		output.PrintError(err)
+		output.PrintError("Ошибка шифрования")
 		return err
 	}
-	return nil
-}
 
-func (v *Vault) Lock() {
-	v.Mu.Lock()
-}
-
-func (v *Vault) Unlock() {
-	v.Mu.Unlock()
-}
-
-func (v *Vault) RLock() {
-	v.Mu.RLock()
-}
-
-func (v *Vault) RUnlock() {
-	v.Mu.RUnlock()
+	return vault.Db.Write(encrypted)
 }
